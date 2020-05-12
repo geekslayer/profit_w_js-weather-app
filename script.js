@@ -7,8 +7,11 @@
  // Keycode for enter
 let enterKeycode = 13;
 
+let baseUrl = 'https://api.openweathermap.org/data/2.5/weather';
+let baseImgUrl = 'http://openweathermap.org/img/wn';
+
 // API_KEY for maps api
-let API_KEY = "a8e71c9932b20c4ceb0aed183e6a83bb";
+let apiKey = "a8e71c9932b20c4ceb0aed183e6a83bb";
 
 
 $(document).ready(function() {
@@ -20,6 +23,8 @@ $(document).ready(function() {
   });
 
   $('input[name=MeasuringSystem]:radio').click(searchCity);
+
+  $('#ErrorMessageAlert').hide();
 });
 
 getMeasuringSystem = () => {
@@ -32,9 +37,8 @@ getMeasuringSystem = () => {
  * Retrieve weather data from openweathermap
  */
 getWeatherData = (city) => {
-  const URL = "https://api.openweathermap.org/data/2.5/weather";
-  const FULL_URL = `${URL}?q=${city}&appid=${API_KEY}&units=${getMeasuringSystem()}`;
-  const weatherPromise  = fetch(FULL_URL);
+  const fullUrl = `${baseUrl}?q=${city}&appid=${apiKey}&units=${getMeasuringSystem()}`;
+  const weatherPromise  = fetch(fullUrl);
   return weatherPromise.then((response) => {
     return response.json();
   });
@@ -50,18 +54,26 @@ searchCity = () => {
     if (res.cod === 200) {
       showWeatherData(res);
     } else {
-      throw new Error("Not found");
+      throw new Error("City not found");
     }
   }).catch((error)=>{
+    setAlertMessage(error);
+    $('#ErrorMessageAlert').show();
+    // $('.alert').alert();
     resetResult();
   })
+}
+
+setAlertMessage = (msg) => {
+  $('#ErrorMessage').text(msg);
 }
 
 /**
  * Show the weather data in HTML
  */
 showWeatherData = (weatherData) => {
-  let imgSrc = `http://openweathermap.org/img/wn/${weatherData.weather[0].icon}.png`;
+  $('#ErrorMessageAlert').hide();
+  let imgSrc = `${baseImgUrl}/${weatherData.weather[0].icon}.png`;
   $('#weather-icon').attr('src',imgSrc);
   $('#weather-icon').attr('height',72);
   $('#weather-icon').attr('width',72);
